@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { meuleuseTemplate } from './inspectionTemplates'
 
 const equipment = [
   { id:'VMA-0248', name:'Meuleuse angulaire', place:'Chantier WTECEWA31', control:'12/10/2026', state:'À contrôler', tone:'warning' },
@@ -24,6 +25,9 @@ function App() {
   const [answers, setAnswers] = useState<Record<string,string>>({})
   const [nokComments, setNokComments] = useState<Record<string,string>>({})
   const [inspectionDecision, setInspectionDecision] = useState('')
+  const inspectionTemplate = meuleuseTemplate
+  const inspectionPoints = inspectionTemplate.sections.flatMap(section => section.points)
+  const inspectionComplete = inspectionPoints.filter(point => point.required).every(point => Boolean(answers[point.id]))
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
     localStorage.setItem('tooly_language', language)
@@ -93,17 +97,10 @@ function App() {
         </aside>
       </section>
     </main> : <main className="inspectionPage">
-      <header><div><button className="backLink" onClick={()=>setPage('equipmentDetail')}>← {t('backToEquipmentRecord')}</button><h1>{t('fieldInspection')}</h1><p>VMA-0248 · {t('demo.VMA-0248.name')}</p></div><div className="inspectionProgress"><b>{Object.keys(answers).length}/15</b><small>{t('pointsAnswered')}</small></div></header>
+      <header><div><button className="backLink" onClick={()=>setPage('equipmentDetail')}>← {t('backToEquipmentRecord')}</button><h1>{t('fieldInspection')}</h1><p>VMA-0248 · {t('demo.VMA-0248.name')}</p></div><div className="inspectionProgress"><b>{Object.keys(answers).length}/{inspectionPoints.length}</b><small>{t('pointsAnswered')}</small></div></header>
       <section className="fieldContext"><div><small>{t('currentWorksite')}</small><b>{worksite}</b></div><div><small>{t('assignedPerson')}</small><b>{holder}</b></div><button onClick={()=>setPage('equipmentDetail')}>{t('correctAssignment')}</button></section>
-      <section className="panel inspectionIntro"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('periodicInspection')}</i></div><h2>MEULEUSE : points de vérification avant utilisation</h2><p>{t('inspectionMobileHint')}</p>
-        <details className="usageReminders"><summary>{t('beforeUseReminders')}</summary><ul>
-          <li>Utilisez un disque adapté aux travaux à réaliser et à la meuleuse.</li>
-          <li>La pièce à découper doit être stable. Serrez-la si nécessaire.</li>
-          <li>Il ne doit rien y avoir d'inflammable à proximité.</li>
-          <li>Vérifiez que vous ne risquez pas d'endommager un réseau (électrique, gaz, eau...).</li>
-          <li>Portez les EPI indiqués par le fabricant.</li>
-          <li>Attendez l'arrêt complet du disque avant de reposer la meuleuse.</li>
-        </ul></details></section>
+      <section className="panel inspectionIntro"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('periodicInspection')}</i></div><h2>{inspectionTemplate.title}</h2><p>{t('inspectionMobileHint')}</p>
+        <details className="usageReminders"><summary>{t('beforeUseReminders')}</summary><ul>{inspectionTemplate.reminders.map(reminder=><li key={reminder}>{reminder}</li>)}</ul></details></section>
       <section className="checkpointList">
         {[
           {category:'État extérieur',points:[['c1',"Le corps de la meuleuse n'est pas endommagé."],['c2',"Il n'y a pas de vis manquantes."]]},
