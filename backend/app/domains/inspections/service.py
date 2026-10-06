@@ -97,3 +97,54 @@ def record_field_verification(
         db,
         FieldVerification(**data.model_dump()),
     )
+
+
+def resolve_template_for_equipment(
+    db: Session,
+    equipment_id: int,
+    requirement_id: int | None = None,
+):
+    equipment = get_equipment(db, equipment_id)
+    if equipment is None:
+        raise InspectionReferenceError("Equipment not found")
+
+    template_id = None
+    source = None
+
+    if requirement_id is not None:
+        requirement = repository.get_requirement_for_equipment(
+            db,
+            equipment_id,
+            requirement_id,
+        )
+        if requirement is None:
+            raise InspectionReferenceError(
+                "Inspection requirement not found for this equipment"
+            )
+        if requirement.template_id is not None:
+            template_id = requirement.template_id
+            source = "REQUIREMENT"
+
+    if template_id is None and equipment.category is not None:
+        template_id = equipment.category.default_inspection_template_id
+        if template_id is not None:
+            source = "CATEGORY"
+
+    if template_id is None:
+        return None
+
+    template = repository.get_template(db, template_id)
+    if template is None or not template.is_active:
+        raise InspectionReferenceError("Inspection template not found or inactive")
+
+    version = repository.get_latest_published_template_version(db, template_id)
+    if version is None:
+        raise InspectionReferenceError(
+            "No published version exists for this inspection template"
+        )
+
+    return {
+        "source": source,
+        "template": template,
+        "version": version,
+    }
