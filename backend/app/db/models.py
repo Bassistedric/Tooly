@@ -4,9 +4,11 @@ from app.domains.assignments.models import EquipmentAssignment, EquipmentMovemen
 from app.domains.equipment.models import Equipment, EquipmentCategory
 from app.domains.organization.models import Organization, Person, Vehicle
 from app.domains.inspections.models import (
+    EquipmentCategoryTemplate,
     FieldVerification,
     Inspection,
     InspectionRequirement,
+    InspectionResponse,
     InspectionTemplate,
     InspectionTemplateCheckpoint,
     InspectionTemplateSection,
@@ -19,9 +21,11 @@ __all__ = [
     "EquipmentAssignment",
     "EquipmentCategory",
     "EquipmentMovement",
+    "EquipmentCategoryTemplate",
     "FieldVerification",
     "Inspection",
     "InspectionRequirement",
+    "InspectionResponse",
     "InspectionTemplate",
     "InspectionTemplateCheckpoint",
     "InspectionTemplateSection",
