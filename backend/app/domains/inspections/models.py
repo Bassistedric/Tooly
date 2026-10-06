@@ -58,3 +58,24 @@ class Inspection(Base):
     equipment = relationship("Equipment")
     requirement = relationship("InspectionRequirement")
     worksite = relationship("Worksite")
+
+
+class FieldVerification(Base):
+    __tablename__ = "field_verifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    equipment_id: Mapped[int] = mapped_column(
+        ForeignKey("equipment.id"),
+        index=True,
+    )
+    worksite_id: Mapped[int] = mapped_column(
+        ForeignKey("worksites.id"),
+        index=True,
+    )
+    verified_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    verified_by: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    control_in_order: Mapped[bool] = mapped_column(Boolean, default=True)
+    remarks: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    equipment = relationship("Equipment")
+    worksite = relationship("Worksite")
