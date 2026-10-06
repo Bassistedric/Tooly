@@ -9,6 +9,7 @@ class EquipmentCategoryCreate(BaseModel):
     code: str = Field(min_length=1, max_length=50)
     name_key: str = Field(min_length=1, max_length=150)
     parent_id: int | None = None
+    default_inspection_template_id: int | None = None
 
 
 class EquipmentCategoryRead(EquipmentCategoryCreate):
