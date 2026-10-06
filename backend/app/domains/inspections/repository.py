@@ -6,6 +6,8 @@ from .models import (
     FieldVerification,
     Inspection,
     InspectionRequirement,
+    InspectionResponse,
+    InspectionTemplateCheckpoint,
     InspectionTemplate,
     InspectionTemplateVersion,
 )
@@ -120,21 +122,6 @@ def get_default_template_for_category(
     )
 
 
-def search_templates(db: Session, search: str | None = None) -> list[InspectionTemplate]:
-    stmt = select(InspectionTemplate).where(InspectionTemplate.is_active.is_(True))
-    if search:
-        term = f"%{search.strip()}%"
-        stmt = stmt.where(
-            InspectionTemplate.code.ilike(term)
-            | InspectionTemplate.name.ilike(term)
-        )
-    return list(db.scalars(stmt.order_by(InspectionTemplate.name)))
-
-
-def get_template(db: Session, template_id: int) -> InspectionTemplate | None:
-    return db.get(InspectionTemplate, template_id)
-
-
 def get_latest_published_template_version(
     db: Session,
     template_id: int,
@@ -175,3 +162,19 @@ def add_template(db: Session, template: InspectionTemplate) -> InspectionTemplat
     db.commit()
     db.refresh(template)
     return template
+
+
+def get_checkpoint(db: Session, checkpoint_id: int) -> InspectionTemplateCheckpoint | None:
+    return db.get(InspectionTemplateCheckpoint, checkpoint_id)
+
+
+def add_inspection_with_responses(
+    db: Session,
+    inspection: Inspection,
+    responses: list[InspectionResponse],
+) -> Inspection:
+    inspection.responses.extend(responses)
+    db.add(inspection)
+    db.flush()
+    db.refresh(inspection)
+    return inspection
