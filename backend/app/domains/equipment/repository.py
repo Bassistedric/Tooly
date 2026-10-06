@@ -1,7 +1,7 @@
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from .models import Equipment, EquipmentCategory
+from .models import Equipment, EquipmentCategory, EquipmentStatusEvent
 
 
 def list_equipment(db: Session, search: str | None = None) -> list[Equipment]:
@@ -55,3 +55,11 @@ def add_category(db: Session, category: EquipmentCategory) -> EquipmentCategory:
     db.commit()
     db.refresh(category)
     return category
+
+
+def list_status_events(db: Session, equipment_id: int) -> list[EquipmentStatusEvent]:
+    return list(db.scalars(
+        select(EquipmentStatusEvent)
+        .where(EquipmentStatusEvent.equipment_id == equipment_id)
+        .order_by(EquipmentStatusEvent.occurred_at.desc())
+    ))
