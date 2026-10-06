@@ -25,6 +25,65 @@ def search_templates(search: str | None = None, db: Session = Depends(get_db)):
     ]
 
 
+@router.get("/resolve/equipment/{equipment_id}")
+def resolve_equipment_template(
+    equipment_id: int,
+    requirement_id: int | None = None,
+    db: Session = Depends(get_db),
+):
+    try:
+        resolved = service.resolve_template_for_equipment(
+            db,
+            equipment_id,
+            requirement_id,
+        )
+    except service.InspectionReferenceError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    if resolved is None:
+        return {
+            "equipment_id": equipment_id,
+            "template": None,
+            "reason": "NO_TEMPLATE_CONFIGURED",
+        }
+
+    template = resolved["template"]
+    version = resolved["version"]
+    return {
+        "equipment_id": equipment_id,
+        "source": resolved["source"],
+        "template": {
+            "id": template.id,
+            "code": template.code,
+            "name": template.name,
+        },
+        "version": {
+            "id": version.id,
+            "version": version.version,
+            "title": version.title,
+            "reminders": version.reminders,
+            "sections": [
+                {
+                    "id": section.id,
+                    "title": section.title,
+                    "position": section.position,
+                    "checkpoints": [
+                        {
+                            "id": checkpoint.id,
+                            "position": checkpoint.position,
+                            "text": checkpoint.text,
+                            "allows_na": checkpoint.allows_na,
+                            "is_required": checkpoint.is_required,
+                        }
+                        for checkpoint in section.checkpoints
+                    ],
+                }
+                for section in version.sections
+            ],
+        },
+    }
+
+
 @router.post("/requirements", response_model=RequirementRead, status_code=status.HTTP_201_CREATED)
 def create_requirement(data: RequirementCreate, db: Session = Depends(get_db)):
     try:
