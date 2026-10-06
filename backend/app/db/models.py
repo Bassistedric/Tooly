@@ -2,7 +2,7 @@
 
 from app.domains.assignments.models import EquipmentAssignment, EquipmentMovement
 from app.domains.equipment.models import Equipment, EquipmentCategory
-from app.domains.organization.models import Organization
+from app.domains.organization.models import Organization, Person, Vehicle
 from app.domains.worksites.models import Site, Worksite
 
 __all__ = [
@@ -11,6 +11,8 @@ __all__ = [
     "EquipmentCategory",
     "EquipmentMovement",
     "Organization",
+    "Person",
     "Site",
+    "Vehicle",
     "Worksite",
 ]
