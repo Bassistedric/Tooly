@@ -36,3 +36,17 @@ class InspectionRead(InspectionCreate):
     id: int
     equipment_id: int
     next_due_date: date | None
+
+
+class FieldVerificationCreate(BaseModel):
+    equipment_id: int
+    worksite_id: int
+    verified_at: datetime
+    verified_by: str | None = Field(default=None, max_length=150)
+    control_in_order: bool = True
+    remarks: str | None = None
+
+
+class FieldVerificationRead(FieldVerificationCreate):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
