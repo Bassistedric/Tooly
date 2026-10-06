@@ -16,6 +16,15 @@ from .schemas import (
 router = APIRouter(prefix="/inspections", tags=["inspections"])
 
 
+@router.get("/templates")
+def search_templates(search: str | None = None, db: Session = Depends(get_db)):
+    templates = repository.search_templates(db, search)
+    return [
+        {"id": item.id, "code": item.code, "name": item.name}
+        for item in templates
+    ]
+
+
 @router.post("/requirements", response_model=RequirementRead, status_code=status.HTTP_201_CREATED)
 def create_requirement(data: RequirementCreate, db: Session = Depends(get_db)):
     try:
