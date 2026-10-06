@@ -42,12 +42,6 @@ class EquipmentCategory(Base):
         index=True,
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    default_inspection_template_id: Mapped[int | None] = mapped_column(
-        ForeignKey("inspection_templates.id"),
-        nullable=True,
-        index=True,
-    )
-
     parent: Mapped["EquipmentCategory | None"] = relationship(
         remote_side=[id],
         back_populates="children",
@@ -55,7 +49,6 @@ class EquipmentCategory(Base):
     children: Mapped[list["EquipmentCategory"]] = relationship(
         back_populates="parent",
     )
-    default_inspection_template = relationship("InspectionTemplate")
 
 
 class Equipment(Base):
