@@ -17,9 +17,11 @@ function LanguageFlag({ code }: { code: string }) {
 
 function App() {
   const { t, i18n } = useTranslation()
-  const [page, setPage] = useState<'dashboard'|'equipment'|'equipmentDetail'>('dashboard')
+  const [page, setPage] = useState<'dashboard'|'equipment'|'equipmentDetail'|'inspection'>('dashboard')
   const [worksite, setWorksite] = useState('WTECEWA31')
   const [holder, setHolder] = useState('Marc Dupont')
+  const [assignmentSaved, setAssignmentSaved] = useState(true)
+  const [answers, setAnswers] = useState<Record<string,string>>({})
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
     localStorage.setItem('tooly_language', language)
@@ -69,25 +71,35 @@ function App() {
       </div><div className="tableFooter"><span>{t('showing', {shown:4,total:'1 284'})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
     </main></> : <main>
       <header><div><button className="backLink" onClick={()=>setPage('equipment')}>← {t('backToEquipment')}</button><h1>{t('demo.VMA-0248.name')}</h1><p>VMA-0248 · Bosch GWS 18V-10</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div></header>
-      <section className="detailStatus"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('due')}</i></div><div className="detailActions"><button>⌗ {t('showQr')}</button><button>⇄ {t('moveEquipment')}</button><button className="add">✓ {t('inspect')}</button></div></section>
+      <section className="detailStatus"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('due')}</i></div><div className="detailActions"><button>⌗ {t('showQr')}</button><button>⇄ {t('moveEquipment')}</button><button className="add" onClick={()=>setPage('inspection')}>✓ {t('inspect')}</button></div></section>
       <section className="detailGrid">
         <div className="detailMain">
           <section className="panel"><div className="panelHead"><div><h2>{t('identification')}</h2><p>{t('identificationSub')}</p></div><button>{t('edit')}</button></div><div className="infoGrid">
             <div><small>{t('businessNumber')}</small><b>VMA-0248</b></div><div><small>{t('serialNumber')}</small><b>GW18-2409138</b></div><div><small>{t('brand')}</small><b>Bosch Professional</b></div><div><small>{t('modelLabel')}</small><b>GWS 18V-10</b></div><div><small>{t('category')}</small><b>{t('portableTool')}</b></div><div><small>{t('organization')}</small><b>VMA Sud · HVAC</b></div>
           </div></section>
           <section className="panel"><div className="panelHead"><div><h2>{t('inspectionTracking')}</h2><p>{t('inspectionTrackingSub')}</p></div><button>{t('history')}</button></div>
-            <div className="inspectionCards"><article><span className="statusDot warning"></span><div><small>{t('internalPeriodic')}</small><b>{t('dueOn')} 12/10/2026</b><p>{t('lastInspection')} 12/07/2026 · {t('compliant')}</p></div><button>✓ {t('inspect')}</button></article><article><span className="statusDot good"></span><div><small>{t('preUse')}</small><b>{t('inOrder')}</b><p>{t('verifiedOn')} 06/10/2026</p></div></article></div>
+            <div className="inspectionCards"><article><span className="statusDot warning"></span><div><small>{t('internalPeriodic')}</small><b>{t('dueOn')} 12/10/2026</b><p>{t('lastInspection')} 12/07/2026 · {t('compliant')}</p></div><button onClick={()=>setPage('inspection')}>✓ {t('inspect')}</button></article><article><span className="statusDot good"></span><div><small>{t('preUse')}</small><b>{t('inOrder')}</b><p>{t('verifiedOn')} 06/10/2026</p></div></article></div>
           </section>
           <section className="panel"><div className="panelHead"><div><h2>{t('recentHistory')}</h2><p>{t('recentHistorySub')}</p></div><button>{t('seeAll')} →</button></div><div className="timeline"><div><span>⇄</span><p><b>{t('assignedToWorksite')}</b><small>WTECEWA31 · 02/10/2026 · C. Comblé</small></p></div><div><span>✓</span><p><b>{t('periodicInspectionDone')}</b><small>12/07/2026 · {t('compliant')}</small></p></div><div><span>▣</span><p><b>{t('commissioned')}</b><small>15/03/2024 · Stock LLN</small></p></div></div></section>
         </div>
         <aside className="detailSide">
-          <section className="panel locationCard"><h2>{t('currentLocation')}</h2><strong>{t('worksite')}</strong><select className="detailSelect" value={worksite} onChange={e=>setWorksite(e.target.value)}><option>WTECEWA31</option><option>WTECEWA42</option><option>Stock LLN</option><option>Atelier Jumet</option></select><small>{t('since')} 02/10/2026</small>
-          <div className="holderBlock"><span>{t('assignedPerson')}</span><select className="detailSelect" value={holder} onChange={e=>setHolder(e.target.value)}><option>Marc Dupont</option><option>Jean Martin</option><option>Cédric Comblé</option><option>{t('unassigned')}</option></select></div>
-          <button>⇄ {t('confirmAssignment')}</button></section>
+          <section className="panel locationCard"><h2>{t('currentLocation')}</h2><strong>{t('worksite')}</strong><select className="detailSelect" value={worksite} onChange={e=>{setWorksite(e.target.value);setAssignmentSaved(false)}}><option>WTECEWA31</option><option>WTECEWA42</option><option>Stock LLN</option><option>Atelier Jumet</option></select><small>{t('since')} 02/10/2026</small>
+          <div className="holderBlock"><span>{t('assignedPerson')}</span><select className="detailSelect" value={holder} onChange={e=>{setHolder(e.target.value);setAssignmentSaved(false)}}><option>Marc Dupont</option><option>Jean Martin</option><option>Cédric Comblé</option><option>{t('unassigned')}</option></select></div>
+          <button className={assignmentSaved?'savedAssignment':''} onClick={()=>setAssignmentSaved(true)}>⇄ {assignmentSaved?t('assignmentSaved'):t('confirmAssignment')}</button></section>
           <section className="panel"><h2>{t('documents')}</h2><div className="docList"><button>▤ <span>{t('safetySheet')}<small>PDF · v3</small></span>›</button><button>▤ <span>{t('userManual')}<small>PDF</small></span>›</button><button>▤ <span>{t('ceDeclaration')}<small>PDF</small></span>›</button></div><button className="secondaryFull">+ {t('addDocument')}</button></section>
           <section className="panel qrCard"><div className="fakeQr">TOOLY<br/><b>VMA-0248</b></div><div><h2>{t('qrIdentification')}</h2><p>{t('qrInstalled')}</p><small>18/09/2026</small></div></section>
         </aside>
       </section>
+    </main> : <main className="inspectionPage">
+      <header><div><button className="backLink" onClick={()=>setPage('equipmentDetail')}>← {t('backToEquipmentRecord')}</button><h1>{t('fieldInspection')}</h1><p>VMA-0248 · {t('demo.VMA-0248.name')}</p></div><div className="inspectionProgress"><b>{Object.keys(answers).length}/6</b><small>{t('pointsAnswered')}</small></div></header>
+      <section className="fieldContext"><div><small>{t('currentWorksite')}</small><b>{worksite}</b></div><div><small>{t('assignedPerson')}</small><b>{holder}</b></div><button onClick={()=>setPage('equipmentDetail')}>{t('correctAssignment')}</button></section>
+      <section className="panel inspectionIntro"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('periodicInspection')}</i></div><h2>{t('angleGrinderInspection')}</h2><p>{t('inspectionMobileHint')}</p></section>
+      <section className="checkpointList">
+        {[
+          ['c1','generalCondition'],['c2','guardsCondition'],['c3','powerSupply'],['c4','switchOperation'],['c5','discCondition'],['c6','markingsCondition']
+        ].map(([id,label],index)=><article className={'checkpoint '+(answers[id]?'answered':'')} key={id}><div className="checkpointText"><span>{index+1}</span><div><b>{t(label)}</b><small>{t(label+'Help')}</small></div></div><div className="answerButtons">{['OK','NOK','NA'].map(value=><button key={value} className={answers[id]===value?('answerSelected '+value.toLowerCase()):''} onClick={()=>setAnswers({...answers,[id]:value})}>{value==='NA'?t('na'):value}</button>)}</div></article>)}
+      </section>
+      <section className="inspectionFooter"><div><span>{t('inspectionResult')}</span><b>{Object.values(answers).includes('NOK')?'NOK':Object.keys(answers).length===6?t('compliant'):t('inProgress')}</b></div><button disabled={Object.keys(answers).length<6}>{t('finishInspection')}</button></section>
     </main>}
   </div>
 }
