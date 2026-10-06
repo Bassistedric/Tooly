@@ -18,6 +18,8 @@ function LanguageFlag({ code }: { code: string }) {
 function App() {
   const { t, i18n } = useTranslation()
   const [page, setPage] = useState<'dashboard'|'equipment'|'equipmentDetail'>('dashboard')
+  const [worksite, setWorksite] = useState('WTECEWA31')
+  const [holder, setHolder] = useState('Marc Dupont')
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
     localStorage.setItem('tooly_language', language)
@@ -79,7 +81,9 @@ function App() {
           <section className="panel"><div className="panelHead"><div><h2>{t('recentHistory')}</h2><p>{t('recentHistorySub')}</p></div><button>{t('seeAll')} →</button></div><div className="timeline"><div><span>⇄</span><p><b>{t('assignedToWorksite')}</b><small>WTECEWA31 · 02/10/2026 · C. Comblé</small></p></div><div><span>✓</span><p><b>{t('periodicInspectionDone')}</b><small>12/07/2026 · {t('compliant')}</small></p></div><div><span>▣</span><p><b>{t('commissioned')}</b><small>15/03/2024 · Stock LLN</small></p></div></div></section>
         </div>
         <aside className="detailSide">
-          <section className="panel locationCard"><h2>{t('currentLocation')}</h2><strong>{t('demo.VMA-0248.place')}</strong><p>WTECEWA31</p><small>{t('since')} 02/10/2026</small><button>⇄ {t('changeAssignment')}</button></section>
+          <section className="panel locationCard"><h2>{t('currentLocation')}</h2><strong>{t('worksite')}</strong><select className="detailSelect" value={worksite} onChange={e=>setWorksite(e.target.value)}><option>WTECEWA31</option><option>WTECEWA42</option><option>Stock LLN</option><option>Atelier Jumet</option></select><small>{t('since')} 02/10/2026</small>
+          <div className="holderBlock"><span>{t('assignedPerson')}</span><select className="detailSelect" value={holder} onChange={e=>setHolder(e.target.value)}><option>Marc Dupont</option><option>Jean Martin</option><option>Cédric Comblé</option><option>{t('unassigned')}</option></select></div>
+          <button>⇄ {t('confirmAssignment')}</button></section>
           <section className="panel"><h2>{t('documents')}</h2><div className="docList"><button>▤ <span>{t('safetySheet')}<small>PDF · v3</small></span>›</button><button>▤ <span>{t('userManual')}<small>PDF</small></span>›</button><button>▤ <span>{t('ceDeclaration')}<small>PDF</small></span>›</button></div><button className="secondaryFull">+ {t('addDocument')}</button></section>
           <section className="panel qrCard"><div className="fakeQr">TOOLY<br/><b>VMA-0248</b></div><div><h2>{t('qrIdentification')}</h2><p>{t('qrInstalled')}</p><small>18/09/2026</small></div></section>
         </aside>
