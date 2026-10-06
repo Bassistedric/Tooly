@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const equipment = [
@@ -17,6 +17,7 @@ function LanguageFlag({ code }: { code: string }) {
 
 function App() {
   const { t, i18n } = useTranslation()
+  const [page, setPage] = useState<'dashboard'|'equipment'>('dashboard')
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
     localStorage.setItem('tooly_language', language)
@@ -25,8 +26,8 @@ function App() {
     <aside>
       <div className="brand"><span className="brandMark">T</span><div><b>Tooly</b><small>{t('equipmentManagement')}</small></div></div>
       <nav>
-        <button className="active">⌂ <span>{t('dashboard')}</span></button>
-        <button>▣ <span>{t('equipment')}</span></button>
+        <button className={page==='dashboard'?'active':''} onClick={()=>setPage('dashboard')}>⌂ <span>{t('dashboard')}</span></button>
+        <button className={page==='equipment'?'active':''} onClick={()=>setPage('equipment')}>▣ <span>{t('equipment')}</span></button>
         <button>⌖ <span>{t('worksites')}</span></button>
         <button>✓ <span>{t('inspections')}</span><em>12</em></button>
         <button>⇄ <span>{t('movements')}</span></button>
@@ -35,7 +36,7 @@ function App() {
       </nav>
       <div className="asideBottom"><button>⚙ <span>{t('admin')}</span></button><div className="profile"><span>CC</span><div><b>Cédric C.</b><small>Administrateur</small></div></div></div>
     </aside>
-    <main>
+    {page === 'dashboard' ? <main>
       <header><div><h1>{t('hello')}</h1><p>{t('overview')}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div><div className="headerActions"><button className="scan">⌗ {t('scan')}</button><button className="add">+ {t('newEquipment')}</button></div></header>
       <section className="search"><span>⌕</span><input placeholder={t('search')}/></section>
       <section className="metrics">
@@ -56,7 +57,15 @@ function App() {
         </div>
       </section>
       <section className="panel quick"><div><h2>{t('quick')}</h2><p>{t('quickSub')}</p></div><div className="quickActions"><button><b>⌗</b><span>{t('identify')}<small>{t('identifySub')}</small></span></button><button><b>✓</b><span>{t('doInspection')}<small>{t('doInspectionSub')}</small></span></button><button><b>⇄</b><span>{t('assign')}<small>{t('assignSub')}</small></span></button><button><b>▤</b><span>{t('openSds')}<small>{t('openSdsSub')}</small></span></button></div></section>
-    </main>
+</main> : <>    <main>
+      <header><div><h1>{t('equipment')}</h1><p>{t('equipmentListSub')}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div><div className="headerActions"><button className="scan">⌗ {t('scan')}</button><button className="add">+ {t('newEquipment')}</button></div></header>
+      <section className="search"><span>⌕</span><input placeholder={t('search')}/></section>
+      <section className="equipmentToolbar"><div className="filterGroup"><button className="filterActive">{t('all')} <b>1284</b></button><button>{t('toInspect')} <b>37</b></button><button>{t('quarantine')} <b>8</b></button><button>{t('lost')} <b>5</b></button></div><button className="filters">☷ {t('filters')}</button></section>
+      <section className="panel equipmentPanel"><div className="equipmentTable">
+        <div className="eqRow eqHead"><span>{t('number')}</span><span>{t('equipment')}</span><span>{t('category')}</span><span>{t('location')}</span><span>{t('complianceLabel')}</span><span>{t('nextInspection')}</span><span></span></div>
+        {equipment.map(e=><div className="eqRow" key={e.id}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
+      </div><div className="tableFooter"><span>{t('showing', {shown:4,total:'1 284'})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
+    </main></>}
   </div>
 }
 export default App
