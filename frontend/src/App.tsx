@@ -106,22 +106,14 @@ function App() {
         </ul></details></section>
       <section className="checkpointList">
         {[
-          ['c1','État extérieur',"Le corps de la meuleuse n'est pas endommagé."],
-          ['c2','État extérieur',"Il n'y a pas de vis manquantes."],
-          ['c3','Disque',"Le disque est en bon état apparent."],
-          ['c4','Disque',"Il n'est pas périmé."],
-          ['c5','Disque',"Il est monté dans le bon sens de rotation et bien fixé."],
-          ['c6','Équipement',"Le carter de protection du disque est présent."],
-          ['c7','Équipement',"Il est correctement fixé."],
-          ['c8','Équipement',"La poignée est présente."],
-          ['c9','Équipement',"Le tube d'évacuation éventuel n'est pas obstrué."],
-          ['c10',"Câble d'alimentation","Le câble d'alimentation éventuel est en bon état."],
-          ['c11','Batterie',"La batterie éventuelle n'est ni déformée, ni gonflée, ni percée, ni chaude avant utilisation."],
-          ['c12','Batterie',"Elle s'installe et se retire facilement."],
-          ['c13','Batterie',"Il n'y a pas d'écoulement."],
-          ['c14','Réglages',"Le réglage éventuel de la vitesse fonctionne."],
-          ['c15','Fonctionnement',"La meuleuse fonctionne correctement."]
-        ].map(([id,category,point],index)=><article className={'checkpoint '+(answers[id]?'answered':'')} key={id}><div className="checkpointText"><span>{index+1}</span><div><small className="checkpointCategory">{category}</small><b>{point}</b></div></div><div className="answerButtons">{['OK','NOK','NA'].map(value=><button key={value} className={answers[id]===value?('answerSelected '+value.toLowerCase()):''} onClick={()=>setAnswers({...answers,[id]:value})}>{value==='NA'?t('na'):value}</button>)}</div>{answers[id]==='NOK' && <div className="nokDetail"><label>{t('nokComment')} *</label><textarea value={nokComments[id]||''} onChange={e=>setNokComments({...nokComments,[id]:e.target.value})} placeholder={t('nokCommentPlaceholder')}/></div>}</article>)}
+          {category:'État extérieur',points:[['c1',"Le corps de la meuleuse n'est pas endommagé."],['c2',"Il n'y a pas de vis manquantes."]]},
+          {category:'Disque',points:[['c3',"Le disque est en bon état apparent."],['c4',"Il n'est pas périmé."],['c5',"Il est monté dans le bon sens de rotation et bien fixé."]]},
+          {category:'Équipement',points:[['c6',"Le carter de protection du disque est présent."],['c7',"Il est correctement fixé."],['c8',"La poignée est présente."],['c9',"Le tube d'évacuation éventuel n'est pas obstrué."]]},
+          {category:"Câble d'alimentation",points:[['c10',"Le câble d'alimentation éventuel est en bon état."]]},
+          {category:'Batterie',points:[['c11',"La batterie éventuelle n'est ni déformée, ni gonflée, ni percée, ni chaude avant utilisation."],['c12',"Elle s'installe et se retire facilement."],['c13',"Il n'y a pas d'écoulement."]]},
+          {category:'Réglages',points:[['c14',"Le réglage éventuel de la vitesse fonctionne."]]},
+          {category:'Fonctionnement',points:[['c15',"La meuleuse fonctionne correctement."]]}
+        ].map(section=><section className="checkpointSection" key={section.category}><h2>{section.category}</h2>{section.points.map(([id,point])=>{const index=Number(id.slice(1));return <article className={'checkpoint '+(answers[id]?'answered':'')} key={id}><div className="checkpointText"><span>{index}</span><div><b>{point}</b></div></div><div className="answerButtons">{['OK','NOK','NA'].map(value=><button key={value} className={answers[id]===value?('answerSelected '+value.toLowerCase()):''} onClick={()=>setAnswers({...answers,[id]:value})}>{value==='NA'?t('na'):value}</button>)}</div>{answers[id]==='NOK'&&<div className="nokDetail"><label>{t('nokComment')} *</label><textarea value={nokComments[id]||''} onChange={e=>setNokComments({...nokComments,[id]:e.target.value})} placeholder={t('nokCommentPlaceholder')}/></div>}</article>})}</section>)}
       </section>
       {Object.values(answers).includes('NOK') && <section className="panel nokDecision"><h2>{t('nokDecisionTitle')}</h2><p>{t('nokDecisionHelp')}</p><div className="decisionButtons"><button className={inspectionDecision==='NOK'?'selected':''} onClick={()=>setInspectionDecision('NOK')}>{t('keepNok')}</button><button className={inspectionDecision==='QUARANTINE'?'selected quarantineChoice':''} onClick={()=>setInspectionDecision('QUARANTINE')}>{t('putInQuarantine')}</button><button className={inspectionDecision==='DECOMMISSIONED'?'selected dangerChoice':''} onClick={()=>setInspectionDecision('DECOMMISSIONED')}>{t('decommission')}</button></div><label className="actionLabel">{t('correctiveAction')}</label><textarea placeholder={t('correctiveActionPlaceholder')}/></section>}
       <section className="inspectionFooter"><div><span>{t('inspectionResult')}</span><b>{Object.values(answers).includes('NOK')?(inspectionDecision==='QUARANTINE'?t('quarantineResult'):inspectionDecision==='DECOMMISSIONED'?t('decommissionedResult'):'NOK'):Object.keys(answers).length===15?t('compliant'):t('inProgress')}</b></div><button disabled={Object.keys(answers).length<15 || (Object.entries(answers).some(([id,v])=>v==='NOK' && !(nokComments[id]||'').trim())) || (Object.values(answers).includes('NOK') && !inspectionDecision)}>{t('finishInspection')}</button></section>
