@@ -29,6 +29,13 @@ function translateDemoState(value: string, lang: string) {
   return map[lang]?.[value] ?? value
 }
 
+function LanguageFlag({ code }: { code: string }) {
+  if (code === 'fr') return <svg viewBox="0 0 30 20" aria-hidden="true"><path fill="#002395" d="M0 0h10v20H0z"/><path fill="#fff" d="M10 0h10v20H10z"/><path fill="#ED2939" d="M20 0h10v20H20z"/></svg>
+  if (code === 'nl') return <svg viewBox="0 0 30 20" aria-hidden="true"><path fill="#AE1C28" d="M0 0h30v6.67H0z"/><path fill="#fff" d="M0 6.67h30v6.66H0z"/><path fill="#21468B" d="M0 13.33h30V20H0z"/></svg>
+  if (code === 'pl') return <svg viewBox="0 0 30 20" aria-hidden="true"><path fill="#fff" d="M0 0h30v10H0z"/><path fill="#DC143C" d="M0 10h30v10H0z"/></svg>
+  return <svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path stroke="#fff" strokeWidth="4" d="M0 0l30 20M30 0L0 20"/><path stroke="#C8102E" strokeWidth="2" d="M0 0l30 20M30 0L0 20"/><path stroke="#fff" strokeWidth="6" d="M15 0v20M0 10h30"/><path stroke="#C8102E" strokeWidth="3.5" d="M15 0v20M0 10h30"/></svg>
+}
+
 function App() {
   const { t, i18n } = useTranslation()
   const changeLanguage = (language: string) => {
@@ -50,7 +57,7 @@ function App() {
       <div className="asideBottom"><button>⚙ <span>{t('admin')}</span></button><div className="profile"><span>CC</span><div><b>Cédric C.</b><small>Administrateur</small></div></div></div>
     </aside>
     <main>
-      <header><div><h1>{t('hello')}</h1><p>{t('overview')}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',flag:'🇫🇷',label:'Français'},{code:'nl',flag:'🇳🇱',label:'Nederlands'},{code:'en',flag:'🇬🇧',label:'English'},{code:'pl',flag:'🇵🇱',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}>{item.flag}</button>)}</div></div><div className="headerActions"><button className="scan">⌗ {t('scan')}</button><button className="add">+ {t('newEquipment')}</button></div></header>
+      <header><div><h1>{t('hello')}</h1><p>{t('overview')}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div><div className="headerActions"><button className="scan">⌗ {t('scan')}</button><button className="add">+ {t('newEquipment')}</button></div></header>
       <section className="search"><span>⌕</span><input placeholder={t('search')}/></section>
       <section className="metrics">
         <article><span className="metricIcon">▣</span><div><small>{t('active')}</small><strong>1 284</strong><p>+ 18 ce mois</p></div></article>
