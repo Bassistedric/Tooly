@@ -10,3 +10,14 @@ export const meuleuseTemplate:InspectionTemplate={code:'MEULEUSE',name:'Meuleuse
 {title:'Réglages',points:[['c14','Le réglage éventuel de la vitesse fonctionne.']].map(([id,text])=>({id,text,allowsNa:true,required:true}))},
 {title:'Fonctionnement',points:[['c15','La meuleuse fonctionne correctement.']].map(([id,text])=>({id,text,allowsNa:true,required:true}))}
 ]}
+export const genericTemplate:InspectionTemplate={code:'GENERIC',name:'Contrôle générique',title:'CONTRÔLE GÉNÉRIQUE : points de vérification avant utilisation',reminders:[],sections:[{title:'État général',points:[
+{id:'g1',text:"L'équipement ne présente pas de détérioration visible.",allowsNa:false,required:true},
+{id:'g2',text:'Les protections et dispositifs de sécurité sont présents et en bon état.',allowsNa:true,required:true},
+{id:'g3',text:"L'alimentation, le câble, la fiche ou la batterie sont en bon état.",allowsNa:true,required:true},
+{id:'g4',text:'Les commandes et dispositifs d’arrêt fonctionnent correctement.',allowsNa:true,required:true},
+{id:'g5',text:'Les accessoires et éléments de fixation sont adaptés et correctement fixés.',allowsNa:true,required:true},
+{id:'g6',text:"Les marquages et l'identification de l'équipement sont lisibles.",allowsNa:false,required:true}
+]}]}
+
+export const templateByEquipmentId:Record<string,InspectionTemplate>={'VMA-0248':meuleuseTemplate}
+export function resolveInspectionTemplate(equipmentId:string){return templateByEquipmentId[equipmentId]??genericTemplate}
