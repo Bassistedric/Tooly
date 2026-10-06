@@ -122,8 +122,21 @@ def record_inspection(db: Session, data: InspectionCreate) -> Inspection:
 
     try:
         inspection = repository.add_inspection_with_responses(db, inspection, responses)
+        equipment = requirement.equipment
+
         if data.outcome == data.outcome.COMPLIANT:
             requirement.next_due_date = next_due
+            equipment.compliance_status = EquipmentComplianceStatus.COMPLIANT
+        elif data.outcome == data.outcome.NOK:
+            equipment.compliance_status = EquipmentComplianceStatus.NOK
+        elif data.outcome == data.outcome.QUARANTINE:
+            equipment.compliance_status = EquipmentComplianceStatus.NOK
+            equipment.operational_status = EquipmentOperationalStatus.QUARANTINE
+        elif data.outcome == data.outcome.DECOMMISSIONED:
+            equipment.compliance_status = EquipmentComplianceStatus.NOK
+            equipment.operational_status = EquipmentOperationalStatus.DECOMMISSIONED
+
+        db.add(equipment)
         db.add(requirement)
         db.commit()
         db.refresh(inspection)
