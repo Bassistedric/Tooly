@@ -17,7 +17,7 @@ function LanguageFlag({ code }: { code: string }) {
 
 function App() {
   const { t, i18n } = useTranslation()
-  const [page, setPage] = useState<'dashboard'|'equipment'>('dashboard')
+  const [page, setPage] = useState<'dashboard'|'equipment'|'equipmentDetail'>('dashboard')
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
     localStorage.setItem('tooly_language', language)
@@ -57,15 +57,34 @@ function App() {
         </div>
       </section>
       <section className="panel quick"><div><h2>{t('quick')}</h2><p>{t('quickSub')}</p></div><div className="quickActions"><button><b>⌗</b><span>{t('identify')}<small>{t('identifySub')}</small></span></button><button><b>✓</b><span>{t('doInspection')}<small>{t('doInspectionSub')}</small></span></button><button><b>⇄</b><span>{t('assign')}<small>{t('assignSub')}</small></span></button><button><b>▤</b><span>{t('openSds')}<small>{t('openSdsSub')}</small></span></button></div></section>
-</main> : <>    <main>
+</main> : page === 'equipment' ? <>    <main>
       <header><div><h1>{t('equipment')}</h1><p>{t('equipmentListSub')}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div><div className="headerActions"><button className="scan">⌗ {t('scan')}</button><button className="add">+ {t('newEquipment')}</button></div></header>
       <section className="search"><span>⌕</span><input placeholder={t('search')}/></section>
       <section className="equipmentToolbar"><div className="filterGroup"><button className="filterActive">{t('all')} <b>1284</b></button><button>{t('toInspect')} <b>37</b></button><button>{t('quarantine')} <b>8</b></button><button>{t('lost')} <b>5</b></button></div><button className="filters">☷ {t('filters')}</button></section>
       <section className="panel equipmentPanel"><div className="equipmentTable">
         <div className="eqRow eqHead"><span>{t('number')}</span><span>{t('equipment')}</span><span>{t('category')}</span><span>{t('location')}</span><span>{t('complianceLabel')}</span><span>{t('nextInspection')}</span><span></span></div>
-        {equipment.map(e=><div className="eqRow" key={e.id}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
+        {equipment.map(e=><div className="eqRow clickable" key={e.id} onClick={()=>setPage('equipmentDetail')}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
       </div><div className="tableFooter"><span>{t('showing', {shown:4,total:'1 284'})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
-    </main></>}
+    </main></> : <main>
+      <header><div><button className="backLink" onClick={()=>setPage('equipment')}>← {t('backToEquipment')}</button><h1>{t('demo.VMA-0248.name')}</h1><p>VMA-0248 · Bosch GWS 18V-10</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div></header>
+      <section className="detailStatus"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('due')}</i></div><div className="detailActions"><button>⌗ {t('showQr')}</button><button>⇄ {t('moveEquipment')}</button><button className="add">✓ {t('inspect')}</button></div></section>
+      <section className="detailGrid">
+        <div className="detailMain">
+          <section className="panel"><div className="panelHead"><div><h2>{t('identification')}</h2><p>{t('identificationSub')}</p></div><button>{t('edit')}</button></div><div className="infoGrid">
+            <div><small>{t('businessNumber')}</small><b>VMA-0248</b></div><div><small>{t('serialNumber')}</small><b>GW18-2409138</b></div><div><small>{t('brand')}</small><b>Bosch Professional</b></div><div><small>{t('modelLabel')}</small><b>GWS 18V-10</b></div><div><small>{t('category')}</small><b>{t('portableTool')}</b></div><div><small>{t('organization')}</small><b>VMA Sud · HVAC</b></div>
+          </div></section>
+          <section className="panel"><div className="panelHead"><div><h2>{t('inspectionTracking')}</h2><p>{t('inspectionTrackingSub')}</p></div><button>{t('history')}</button></div>
+            <div className="inspectionCards"><article><span className="statusDot warning"></span><div><small>{t('internalPeriodic')}</small><b>{t('dueOn')} 12/10/2026</b><p>{t('lastInspection')} 12/07/2026 · {t('compliant')}</p></div><button>✓ {t('inspect')}</button></article><article><span className="statusDot good"></span><div><small>{t('preUse')}</small><b>{t('inOrder')}</b><p>{t('verifiedOn')} 06/10/2026</p></div></article></div>
+          </section>
+          <section className="panel"><div className="panelHead"><div><h2>{t('recentHistory')}</h2><p>{t('recentHistorySub')}</p></div><button>{t('seeAll')} →</button></div><div className="timeline"><div><span>⇄</span><p><b>{t('assignedToWorksite')}</b><small>WTECEWA31 · 02/10/2026 · C. Comblé</small></p></div><div><span>✓</span><p><b>{t('periodicInspectionDone')}</b><small>12/07/2026 · {t('compliant')}</small></p></div><div><span>▣</span><p><b>{t('commissioned')}</b><small>15/03/2024 · Stock LLN</small></p></div></div></section>
+        </div>
+        <aside className="detailSide">
+          <section className="panel locationCard"><h2>{t('currentLocation')}</h2><strong>{t('demo.VMA-0248.place')}</strong><p>WTECEWA31</p><small>{t('since')} 02/10/2026</small><button>⇄ {t('changeAssignment')}</button></section>
+          <section className="panel"><h2>{t('documents')}</h2><div className="docList"><button>▤ <span>{t('safetySheet')}<small>PDF · v3</small></span>›</button><button>▤ <span>{t('userManual')}<small>PDF</small></span>›</button><button>▤ <span>{t('ceDeclaration')}<small>PDF</small></span>›</button></div><button className="secondaryFull">+ {t('addDocument')}</button></section>
+          <section className="panel qrCard"><div className="fakeQr">TOOLY<br/><b>VMA-0248</b></div><div><h2>{t('qrIdentification')}</h2><p>{t('qrInstalled')}</p><small>18/09/2026</small></div></section>
+        </aside>
+      </section>
+    </main>}
   </div>
 }
 export default App
