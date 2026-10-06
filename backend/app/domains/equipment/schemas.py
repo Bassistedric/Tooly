@@ -68,3 +68,21 @@ class EquipmentRead(EquipmentCreate):
     is_archived: bool
     created_at: datetime
     updated_at: datetime
+
+
+class ReturnToServiceCreate(BaseModel):
+    performed_by: str = Field(min_length=1, max_length=150)
+    reason: str | None = None
+    target_status: EquipmentOperationalStatus = EquipmentOperationalStatus.IN_SERVICE
+
+
+class EquipmentStatusEventRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    equipment_id: int
+    occurred_at: datetime
+    event_type: str
+    from_status: str
+    to_status: str
+    performed_by: str
+    reason: str | None
