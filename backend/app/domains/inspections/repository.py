@@ -162,3 +162,16 @@ def get_requirement_for_equipment(
             InspectionRequirement.is_active.is_(True),
         )
     )
+
+
+def get_template_by_code(db: Session, code: str) -> InspectionTemplate | None:
+    return db.scalar(
+        select(InspectionTemplate).where(InspectionTemplate.code == code)
+    )
+
+
+def add_template(db: Session, template: InspectionTemplate) -> InspectionTemplate:
+    db.add(template)
+    db.commit()
+    db.refresh(template)
+    return template
