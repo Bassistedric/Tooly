@@ -22,6 +22,8 @@ function App() {
   const [holder, setHolder] = useState('Marc Dupont')
   const [assignmentSaved, setAssignmentSaved] = useState(true)
   const [answers, setAnswers] = useState<Record<string,string>>({})
+  const [nokComments, setNokComments] = useState<Record<string,string>>({})
+  const [inspectionDecision, setInspectionDecision] = useState('')
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
     localStorage.setItem('tooly_language', language)
@@ -97,9 +99,10 @@ function App() {
       <section className="checkpointList">
         {[
           ['c1','generalCondition'],['c2','guardsCondition'],['c3','powerSupply'],['c4','switchOperation'],['c5','discCondition'],['c6','markingsCondition']
-        ].map(([id,label],index)=><article className={'checkpoint '+(answers[id]?'answered':'')} key={id}><div className="checkpointText"><span>{index+1}</span><div><b>{t(label)}</b><small>{t(label+'Help')}</small></div></div><div className="answerButtons">{['OK','NOK','NA'].map(value=><button key={value} className={answers[id]===value?('answerSelected '+value.toLowerCase()):''} onClick={()=>setAnswers({...answers,[id]:value})}>{value==='NA'?t('na'):value}</button>)}</div></article>)}
+        ].map(([id,label],index)=><article className={'checkpoint '+(answers[id]?'answered':'')} key={id}><div className="checkpointText"><span>{index+1}</span><div><b>{t(label)}</b><small>{t(label+'Help')}</small></div></div><div className="answerButtons">{['OK','NOK','NA'].map(value=><button key={value} className={answers[id]===value?('answerSelected '+value.toLowerCase()):''} onClick={()=>setAnswers({...answers,[id]:value})}>{value==='NA'?t('na'):value}</button>)}</div>{answers[id]==='NOK' && <div className="nokDetail"><label>{t('nokComment')} *</label><textarea value={nokComments[id]||''} onChange={e=>setNokComments({...nokComments,[id]:e.target.value})} placeholder={t('nokCommentPlaceholder')}/></div>}</article>)}
       </section>
-      <section className="inspectionFooter"><div><span>{t('inspectionResult')}</span><b>{Object.values(answers).includes('NOK')?'NOK':Object.keys(answers).length===6?t('compliant'):t('inProgress')}</b></div><button disabled={Object.keys(answers).length<6}>{t('finishInspection')}</button></section>
+      {Object.values(answers).includes('NOK') && <section className="panel nokDecision"><h2>{t('nokDecisionTitle')}</h2><p>{t('nokDecisionHelp')}</p><div className="decisionButtons"><button className={inspectionDecision==='NOK'?'selected':''} onClick={()=>setInspectionDecision('NOK')}>{t('keepNok')}</button><button className={inspectionDecision==='QUARANTINE'?'selected quarantineChoice':''} onClick={()=>setInspectionDecision('QUARANTINE')}>{t('putInQuarantine')}</button><button className={inspectionDecision==='DECOMMISSIONED'?'selected dangerChoice':''} onClick={()=>setInspectionDecision('DECOMMISSIONED')}>{t('decommission')}</button></div><label className="actionLabel">{t('correctiveAction')}</label><textarea placeholder={t('correctiveActionPlaceholder')}/></section>}
+      <section className="inspectionFooter"><div><span>{t('inspectionResult')}</span><b>{Object.values(answers).includes('NOK')?(inspectionDecision==='QUARANTINE'?t('quarantineResult'):inspectionDecision==='DECOMMISSIONED'?t('decommissionedResult'):'NOK'):Object.keys(answers).length===6?t('compliant'):t('inProgress')}</b></div><button disabled={Object.keys(answers).length<6 || (Object.entries(answers).some(([id,v])=>v==='NOK' && !(nokComments[id]||'').trim())) || (Object.values(answers).includes('NOK') && !inspectionDecision)}>{t('finishInspection')}</button></section>
     </main>}
   </div>
 }
