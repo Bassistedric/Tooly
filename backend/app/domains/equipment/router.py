@@ -9,6 +9,8 @@ from .schemas import (
     EquipmentCategoryRead,
     EquipmentCreate,
     EquipmentRead,
+    EquipmentStatusEventRead,
+    ReturnToServiceCreate,
 )
 
 router = APIRouter(prefix="/equipment", tags=["equipment"])
@@ -54,3 +56,25 @@ def create_category(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except service.EquipmentReferenceError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/{equipment_id}/return-to-service", response_model=EquipmentRead)
+def return_to_service(
+    equipment_id: int,
+    data: ReturnToServiceCreate,
+    db: Session = Depends(get_db),
+):
+    try:
+        return service.return_to_service(db, equipment_id, data)
+    except service.EquipmentReferenceError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get(
+    "/{equipment_id}/status-history",
+    response_model=list[EquipmentStatusEventRead],
+)
+def status_history(equipment_id: int, db: Session = Depends(get_db)):
+    if repository.get_equipment(db, equipment_id) is None:
+        raise HTTPException(status_code=404, detail="Equipment not found")
+    return repository.list_status_events(db, equipment_id)
