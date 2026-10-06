@@ -19,14 +19,16 @@ function LanguageFlag({ code }: { code: string }) {
 function App() {
   const { t, i18n } = useTranslation()
   const [page, setPage] = useState<'dashboard'|'equipment'|'equipmentDetail'|'inspection'>('dashboard')
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState('VMA-0248')
+  const selectedEquipment = equipment.find(item => item.id === selectedEquipmentId) ?? equipment[0]
   const [worksite, setWorksite] = useState('WTECEWA31')
   const [holder, setHolder] = useState('Marc Dupont')
   const [assignmentSaved, setAssignmentSaved] = useState(true)
   const [answers, setAnswers] = useState<Record<string,string>>({})
   const [nokComments, setNokComments] = useState<Record<string,string>>({})
   const [inspectionDecision, setInspectionDecision] = useState('')
-  const inspectionTemplate = meuleuseTemplate
-  const inspectionPoints = inspectionTemplate.sections.flatMap(section => section.points)
+  const inspectionTemplate = selectedEquipmentId === 'VMA-0248' ? meuleuseTemplate : null
+  const inspectionPoints = inspectionTemplate?.sections.flatMap(section => section.points) ?? []
   const inspectionComplete = inspectionPoints.filter(point => point.required).every(point => Boolean(answers[point.id]))
   const changeLanguage = (language: string) => {
     void i18n.changeLanguage(language)
@@ -73,7 +75,7 @@ function App() {
       <section className="equipmentToolbar"><div className="filterGroup"><button className="filterActive">{t('all')} <b>1284</b></button><button>{t('toInspect')} <b>37</b></button><button>{t('quarantine')} <b>8</b></button><button>{t('lost')} <b>5</b></button></div><button className="filters">☷ {t('filters')}</button></section>
       <section className="panel equipmentPanel"><div className="equipmentTable">
         <div className="eqRow eqHead"><span>{t('number')}</span><span>{t('equipment')}</span><span>{t('category')}</span><span>{t('location')}</span><span>{t('complianceLabel')}</span><span>{t('nextInspection')}</span><span></span></div>
-        {equipment.map(e=><div className="eqRow clickable" key={e.id} onClick={()=>setPage('equipmentDetail')}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
+        {equipment.map(e=><div className="eqRow clickable" key={e.id} onClick={()=>{setSelectedEquipmentId(e.id);setPage('equipmentDetail')}}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
       </div><div className="tableFooter"><span>{t('showing', {shown:4,total:'1 284'})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
     </main></> : page === 'equipmentDetail' ? <main>
       <header><div><button className="backLink" onClick={()=>setPage('equipment')}>← {t('backToEquipment')}</button><h1>{t('demo.VMA-0248.name')}</h1><p>VMA-0248 · Bosch GWS 18V-10</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div></header>
