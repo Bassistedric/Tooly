@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .models import InspectionKind, InspectionOutcome
+from .models import CheckpointResult, InspectionKind, InspectionOutcome
 
 
 class RequirementCreate(BaseModel):
@@ -23,6 +23,12 @@ class RequirementRead(RequirementCreate):
     is_active: bool
 
 
+class InspectionResponseCreate(BaseModel):
+    checkpoint_id: int
+    answer: CheckpointResult
+    comment: str | None = None
+
+
 class InspectionCreate(BaseModel):
     requirement_id: int
     performed_at: datetime
@@ -30,7 +36,7 @@ class InspectionCreate(BaseModel):
     performed_by: str | None = Field(default=None, max_length=150)
     worksite_id: int | None = None
     remarks: str | None = None
-    template_version_id: int | None = None
+    responses: list[InspectionResponseCreate] = Field(default_factory=list)
 
 
 class InspectionRead(InspectionCreate):
