@@ -7,8 +7,8 @@ from app.domains.equipment.repository import get_equipment
 from app.domains.worksites.repository import get_worksite
 
 from . import repository
-from .models import Inspection, InspectionRequirement
-from .schemas import InspectionCreate, RequirementCreate
+from .models import FieldVerification, Inspection, InspectionRequirement
+from .schemas import FieldVerificationCreate, InspectionCreate, RequirementCreate
 
 
 class InspectionReferenceError(ValueError):
@@ -50,3 +50,19 @@ def record_inspection(db: Session, data: InspectionCreate) -> Inspection:
     requirement.next_due_date = next_due
     db.add(requirement)
     return repository.add_inspection(db, inspection)
+
+
+def record_field_verification(
+    db: Session,
+    data: FieldVerificationCreate,
+) -> FieldVerification:
+    if get_equipment(db, data.equipment_id) is None:
+        raise InspectionReferenceError("Equipment not found")
+    if get_worksite(db, data.worksite_id) is None:
+        raise InspectionReferenceError("Worksite not found")
+
+    # Deliberately does not update InspectionRequirement.next_due_date.
+    return repository.add_field_verification(
+        db,
+        FieldVerification(**data.model_dump()),
+    )
