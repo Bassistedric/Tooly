@@ -25,6 +25,12 @@ class InspectionOutcome(str, enum.Enum):
     NOT_INSPECTED = "NOT_INSPECTED"
 
 
+class CheckpointResult(str, enum.Enum):
+    OK = "OK"
+    NOK = "NOK"
+    NA = "NA"
+
+
 class InspectionRequirement(Base):
     __tablename__ = "inspection_requirements"
 
