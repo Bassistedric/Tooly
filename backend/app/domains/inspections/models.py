@@ -79,3 +79,68 @@ class FieldVerification(Base):
 
     equipment = relationship("Equipment")
     worksite = relationship("Worksite")
+
+
+class InspectionTemplate(Base):
+    __tablename__ = "inspection_templates"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    versions = relationship("InspectionTemplateVersion", back_populates="template")
+
+
+class InspectionTemplateVersion(Base):
+    __tablename__ = "inspection_template_versions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    template_id: Mapped[int] = mapped_column(ForeignKey("inspection_templates.id"), index=True)
+    version: Mapped[int] = mapped_column(Integer)
+    title: Mapped[str] = mapped_column(String(250))
+    reminders: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_reference: Mapped[str | None] = mapped_column(String(250), nullable=True)
+    is_published: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    template = relationship("InspectionTemplate", back_populates="versions")
+    sections = relationship(
+        "InspectionTemplateSection",
+        back_populates="template_version",
+        order_by="InspectionTemplateSection.position",
+    )
+
+
+class InspectionTemplateSection(Base):
+    __tablename__ = "inspection_template_sections"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    template_version_id: Mapped[int] = mapped_column(
+        ForeignKey("inspection_template_versions.id"),
+        index=True,
+    )
+    title: Mapped[str] = mapped_column(String(200))
+    position: Mapped[int] = mapped_column(Integer)
+
+    template_version = relationship("InspectionTemplateVersion", back_populates="sections")
+    checkpoints = relationship(
+        "InspectionTemplateCheckpoint",
+        back_populates="section",
+        order_by="InspectionTemplateCheckpoint.position",
+    )
+
+
+class InspectionTemplateCheckpoint(Base):
+    __tablename__ = "inspection_template_checkpoints"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    section_id: Mapped[int] = mapped_column(
+        ForeignKey("inspection_template_sections.id"),
+        index=True,
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    allows_na: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_required: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    section = relationship("InspectionTemplateSection", back_populates="checkpoints")
