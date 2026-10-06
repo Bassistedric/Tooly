@@ -7,8 +7,8 @@ from app.domains.equipment.repository import get_equipment
 from app.domains.worksites.repository import get_worksite
 
 from . import repository
-from .models import FieldVerification, Inspection, InspectionRequirement
-from .schemas import FieldVerificationCreate, InspectionCreate, RequirementCreate
+from .models import FieldVerification, Inspection, InspectionRequirement, InspectionTemplate, InspectionTemplateCheckpoint, InspectionTemplateSection, InspectionTemplateVersion
+from .schemas import FieldVerificationCreate, InspectionCreate, RequirementCreate, TemplateCreate
 
 
 class InspectionReferenceError(ValueError):
@@ -148,3 +148,47 @@ def resolve_template_for_equipment(
         "template": template,
         "version": version,
     }
+
+
+class InspectionTemplateConflictError(ValueError):
+    pass
+
+
+def create_template(db: Session, data: TemplateCreate) -> InspectionTemplate:
+    code = data.code.strip().upper()
+    if repository.get_template_by_code(db, code) is not None:
+        raise InspectionTemplateConflictError("Inspection template code already exists")
+
+    template = InspectionTemplate(
+        code=code,
+        name=data.name.strip(),
+    )
+    version = InspectionTemplateVersion(
+        version=1,
+        title=data.title.strip(),
+        reminders=data.reminders,
+        source_reference=data.source_reference,
+        is_published=True,
+    )
+    template.versions.append(version)
+
+    for section_position, section_data in enumerate(data.sections, start=1):
+        section = InspectionTemplateSection(
+            title=section_data.title.strip(),
+            position=section_position,
+        )
+        version.sections.append(section)
+        for checkpoint_position, checkpoint_data in enumerate(
+            section_data.checkpoints,
+            start=1,
+        ):
+            section.checkpoints.append(
+                InspectionTemplateCheckpoint(
+                    position=checkpoint_position,
+                    text=checkpoint_data.text.strip(),
+                    allows_na=checkpoint_data.allows_na,
+                    is_required=checkpoint_data.is_required,
+                )
+            )
+
+    return repository.add_template(db, template)
