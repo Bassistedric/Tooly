@@ -14,6 +14,29 @@ class AssignmentReferenceError(ValueError):
     pass
 
 
+def _validate_structured_target(
+    db: Session,
+    target_type: AssignmentTargetType,
+    target_id: int | None,
+) -> None:
+    if target_type in {
+        AssignmentTargetType.SITE,
+        AssignmentTargetType.WORKSITE,
+        AssignmentTargetType.VEHICLE,
+        AssignmentTargetType.PERSON,
+    } and target_id is None:
+        raise AssignmentReferenceError("Structured assignment target requires target_id")
+
+    if target_type == AssignmentTargetType.SITE and get_site(db, target_id) is None:
+        raise AssignmentReferenceError("Site not found")
+    if target_type == AssignmentTargetType.WORKSITE and get_worksite(db, target_id) is None:
+        raise AssignmentReferenceError("Worksite not found")
+    if target_type == AssignmentTargetType.VEHICLE and get_vehicle(db, target_id) is None:
+        raise AssignmentReferenceError("Vehicle not found")
+    if target_type == AssignmentTargetType.PERSON and get_person(db, target_id) is None:
+        raise AssignmentReferenceError("Person not found")
+
+
 def _status_for_target(target_type: AssignmentTargetType) -> EquipmentOperationalStatus:
     if target_type == AssignmentTargetType.QUARANTINE:
         return EquipmentOperationalStatus.QUARANTINE
@@ -29,6 +52,8 @@ def assign_equipment(
     equipment = get_equipment(db, data.equipment_id)
     if equipment is None:
         raise AssignmentReferenceError("Equipment not found")
+
+    _validate_structured_target(db, data.target_type, data.target_id)
 
     now = datetime.utcnow()
     current = repository.get_current_assignment(db, data.equipment_id)
