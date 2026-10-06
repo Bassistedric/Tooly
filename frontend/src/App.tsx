@@ -90,6 +90,7 @@ function App() {
           <section className="panel qrCard"><div className="fakeQr">TOOLY<br/><b>VMA-0248</b></div><div><h2>{t('qrIdentification')}</h2><p>{t('qrInstalled')}</p><small>18/09/2026</small></div></section>
         </aside>
       </section>
+    </main> : page === 'equipmentDetail' ? <main>
     </main> : <main className="inspectionPage">
       <header><div><button className="backLink" onClick={()=>setPage('equipmentDetail')}>← {t('backToEquipmentRecord')}</button><h1>{t('fieldInspection')}</h1><p>VMA-0248 · {t('demo.VMA-0248.name')}</p></div><div className="inspectionProgress"><b>{Object.keys(answers).length}/6</b><small>{t('pointsAnswered')}</small></div></header>
       <section className="fieldContext"><div><small>{t('currentWorksite')}</small><b>{worksite}</b></div><div><small>{t('assignedPerson')}</small><b>{holder}</b></div><button onClick={()=>setPage('equipmentDetail')}>{t('correctAssignment')}</button></section>
