@@ -119,3 +119,16 @@ class Equipment(Base):
 
     organization = relationship("Organization")
     category = relationship("EquipmentCategory")
+
+
+class EquipmentStatusEvent(Base):
+    __tablename__ = "equipment_status_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    equipment_id: Mapped[int] = mapped_column(ForeignKey("equipment.id"), index=True)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    event_type: Mapped[str] = mapped_column(String(50), index=True)
+    from_status: Mapped[str] = mapped_column(String(50))
+    to_status: Mapped[str] = mapped_column(String(50))
+    performed_by: Mapped[str] = mapped_column(String(150))
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    equipment = relationship("Equipment")
