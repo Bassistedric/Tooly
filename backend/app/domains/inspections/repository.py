@@ -133,3 +133,32 @@ def search_templates(db: Session, search: str | None = None) -> list[InspectionT
 
 def get_template(db: Session, template_id: int) -> InspectionTemplate | None:
     return db.get(InspectionTemplate, template_id)
+
+
+def get_latest_published_template_version(
+    db: Session,
+    template_id: int,
+) -> InspectionTemplateVersion | None:
+    return db.scalar(
+        select(InspectionTemplateVersion)
+        .where(
+            InspectionTemplateVersion.template_id == template_id,
+            InspectionTemplateVersion.is_published.is_(True),
+        )
+        .order_by(InspectionTemplateVersion.version.desc())
+        .limit(1)
+    )
+
+
+def get_requirement_for_equipment(
+    db: Session,
+    equipment_id: int,
+    requirement_id: int,
+) -> InspectionRequirement | None:
+    return db.scalar(
+        select(InspectionRequirement).where(
+            InspectionRequirement.id == requirement_id,
+            InspectionRequirement.equipment_id == equipment_id,
+            InspectionRequirement.is_active.is_(True),
+        )
+    )
