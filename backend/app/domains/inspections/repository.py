@@ -118,3 +118,18 @@ def get_default_template_for_category(
             InspectionTemplate.is_active.is_(True),
         )
     )
+
+
+def search_templates(db: Session, search: str | None = None) -> list[InspectionTemplate]:
+    stmt = select(InspectionTemplate).where(InspectionTemplate.is_active.is_(True))
+    if search:
+        term = f"%{search.strip()}%"
+        stmt = stmt.where(
+            InspectionTemplate.code.ilike(term)
+            | InspectionTemplate.name.ilike(term)
+        )
+    return list(db.scalars(stmt.order_by(InspectionTemplate.name)))
+
+
+def get_template(db: Session, template_id: int) -> InspectionTemplate | None:
+    return db.get(InspectionTemplate, template_id)
