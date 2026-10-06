@@ -36,10 +36,16 @@ class InspectionRequirement(Base):
     interval_months: Mapped[int | None] = mapped_column(Integer, nullable=True)
     responsible: Mapped[str | None] = mapped_column(String(150), nullable=True)
     next_due_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+    template_id: Mapped[int | None] = mapped_column(
+        ForeignKey("inspection_templates.id"),
+        nullable=True,
+        index=True,
+    )
     warning_days: Mapped[int] = mapped_column(Integer, default=30)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     equipment = relationship("Equipment")
+    template = relationship("InspectionTemplate")
 
 
 class Inspection(Base):
@@ -54,10 +60,16 @@ class Inspection(Base):
     worksite_id: Mapped[int | None] = mapped_column(ForeignKey("worksites.id"), nullable=True, index=True)
     remarks: Mapped[str | None] = mapped_column(Text, nullable=True)
     next_due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    template_version_id: Mapped[int | None] = mapped_column(
+        ForeignKey("inspection_template_versions.id"),
+        nullable=True,
+        index=True,
+    )
 
     equipment = relationship("Equipment")
     requirement = relationship("InspectionRequirement")
     worksite = relationship("Worksite")
+    template_version = relationship("InspectionTemplateVersion")
 
 
 class FieldVerification(Base):
