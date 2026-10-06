@@ -3,6 +3,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
+from app.domains.equipment.models import EquipmentComplianceStatus, EquipmentOperationalStatus
 from app.domains.equipment.repository import get_equipment
 from app.domains.worksites.repository import get_worksite
 
