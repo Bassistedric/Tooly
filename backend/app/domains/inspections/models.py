@@ -70,6 +70,30 @@ class Inspection(Base):
     requirement = relationship("InspectionRequirement")
     worksite = relationship("Worksite")
     template_version = relationship("InspectionTemplateVersion")
+    responses = relationship(
+        "InspectionResponse",
+        back_populates="inspection",
+        order_by="InspectionResponse.id",
+    )
+
+
+class InspectionResponse(Base):
+    __tablename__ = "inspection_responses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    inspection_id: Mapped[int] = mapped_column(
+        ForeignKey("inspections.id"),
+        index=True,
+    )
+    checkpoint_id: Mapped[int] = mapped_column(
+        ForeignKey("inspection_template_checkpoints.id"),
+        index=True,
+    )
+    answer: Mapped[str] = mapped_column(String(20))
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    inspection = relationship("Inspection", back_populates="responses")
+    checkpoint = relationship("InspectionTemplateCheckpoint")
 
 
 class FieldVerification(Base):
@@ -102,6 +126,25 @@ class InspectionTemplate(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     versions = relationship("InspectionTemplateVersion", back_populates="template")
+
+
+class EquipmentCategoryTemplate(Base):
+    __tablename__ = "equipment_category_templates"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("equipment_categories.id"),
+        index=True,
+    )
+    template_id: Mapped[int] = mapped_column(
+        ForeignKey("inspection_templates.id"),
+        index=True,
+    )
+    kind: Mapped[InspectionKind] = mapped_column(Enum(InspectionKind), index=True)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    category = relationship("EquipmentCategory")
+    template = relationship("InspectionTemplate")
 
 
 class InspectionTemplateVersion(Base):
