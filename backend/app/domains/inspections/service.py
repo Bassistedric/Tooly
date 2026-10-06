@@ -174,9 +174,14 @@ def resolve_template_for_equipment(
             template_id = requirement.template_id
             source = "REQUIREMENT"
 
-    if template_id is None and equipment.category is not None:
-        template_id = equipment.category.default_inspection_template_id
-        if template_id is not None:
+    if template_id is None and equipment.category_id is not None and requirement_id is not None:
+        category_template = repository.get_default_template_for_category(
+            db,
+            equipment.category_id,
+            requirement.kind,
+        )
+        if category_template is not None:
+            template_id = category_template.id
             source = "CATEGORY"
 
     if template_id is None:
