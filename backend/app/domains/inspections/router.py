@@ -4,7 +4,14 @@ from sqlalchemy.orm import Session
 from app.db.dependencies import get_db
 
 from . import repository, service
-from .schemas import InspectionCreate, InspectionRead, RequirementCreate, RequirementRead
+from .schemas import (
+    FieldVerificationCreate,
+    FieldVerificationRead,
+    InspectionCreate,
+    InspectionRead,
+    RequirementCreate,
+    RequirementRead,
+)
 
 router = APIRouter(prefix="/inspections", tags=["inspections"])
 
@@ -33,3 +40,29 @@ def record_inspection(data: InspectionCreate, db: Session = Depends(get_db)):
 @router.get("/equipment/{equipment_id}", response_model=list[InspectionRead])
 def list_inspections(equipment_id: int, db: Session = Depends(get_db)):
     return repository.list_inspections(db, equipment_id)
+
+
+@router.post(
+    "/field-verifications",
+    response_model=FieldVerificationRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def record_field_verification(
+    data: FieldVerificationCreate,
+    db: Session = Depends(get_db),
+):
+    try:
+        return service.record_field_verification(db, data)
+    except service.InspectionReferenceError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get(
+    "/field-verifications/equipment/{equipment_id}",
+    response_model=list[FieldVerificationRead],
+)
+def list_field_verifications(
+    equipment_id: int,
+    db: Session = Depends(get_db),
+):
+    return repository.list_field_verifications(db, equipment_id)
