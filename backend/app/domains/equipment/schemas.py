@@ -13,6 +13,7 @@ class EquipmentCategoryCreate(BaseModel):
 
 class EquipmentCategoryRead(EquipmentCategoryCreate):
     model_config = ConfigDict(from_attributes=True)
+
     id: int
     is_active: bool
 
@@ -25,19 +26,41 @@ class EquipmentBase(BaseModel):
     brand: str | None = Field(default=None, max_length=120)
     model: str | None = Field(default=None, max_length=150)
     notes: str | None = None
+
     organization_id: int
     category_id: int | None = None
+
     manufacture_date: date | None = None
     commissioned_date: date | None = None
 
 
 class EquipmentCreate(EquipmentBase):
-    operational_status: EquipmentOperationalStatus = EquipmentOperationalStatus.IN_STOCK
-    compliance_status: EquipmentComplianceStatus = EquipmentComplianceStatus.TO_VERIFY
+    operational_status: EquipmentOperationalStatus = (
+        EquipmentOperationalStatus.IN_STOCK
+    )
+    compliance_status: EquipmentComplianceStatus = (
+        EquipmentComplianceStatus.TO_VERIFY
+    )
+
+
+class EquipmentUpdate(BaseModel):
+    serial_number: str | None = Field(default=None, max_length=150)
+    external_number: str | None = Field(default=None, max_length=150)
+    description: str | None = Field(default=None, min_length=1, max_length=250)
+    brand: str | None = Field(default=None, max_length=120)
+    model: str | None = Field(default=None, max_length=150)
+    notes: str | None = None
+    organization_id: int | None = None
+    category_id: int | None = None
+    manufacture_date: date | None = None
+    commissioned_date: date | None = None
+    operational_status: EquipmentOperationalStatus | None = None
+    compliance_status: EquipmentComplianceStatus | None = None
 
 
 class EquipmentRead(EquipmentCreate):
     model_config = ConfigDict(from_attributes=True)
+
     id: int
     qr_generated: bool
     qr_installed: bool
