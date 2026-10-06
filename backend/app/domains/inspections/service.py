@@ -7,7 +7,7 @@ from app.domains.equipment.repository import get_equipment
 from app.domains.worksites.repository import get_worksite
 
 from . import repository
-from .models import FieldVerification, Inspection, InspectionRequirement, InspectionTemplate, InspectionTemplateCheckpoint, InspectionTemplateSection, InspectionTemplateVersion
+from .models import CheckpointResult, FieldVerification, Inspection, InspectionRequirement, InspectionResponse, InspectionTemplate, InspectionTemplateCheckpoint, InspectionTemplateSection, InspectionTemplateVersion
 from .schemas import FieldVerificationCreate, InspectionCreate, RequirementCreate, TemplateCreate
 
 
@@ -56,31 +56,80 @@ def record_inspection(db: Session, data: InspectionCreate) -> Inspection:
     if data.worksite_id is not None and get_worksite(db, data.worksite_id) is None:
         raise InspectionReferenceError("Worksite not found")
 
-    template_version_id = data.template_version_id
-    if template_version_id is None and requirement.template_id is not None:
-        version = repository.get_published_template_version(
-            db,
-            requirement.template_id,
-        )
+    template_version_id = None
+    expected_checkpoints = {}
+    if requirement.template_id is not None:
+        version = repository.get_published_template_version(db, requirement.template_id)
         if version is None:
             raise InspectionReferenceError("No published template version available")
         template_version_id = version.id
+        expected_checkpoints = {
+            checkpoint.id: checkpoint
+            for section in version.sections
+            for checkpoint in section.checkpoints
+        }
+
+    submitted = {item.checkpoint_id: item for item in data.responses}
+    if len(submitted) != len(data.responses):
+        raise InspectionReferenceError("Duplicate checkpoint response")
+
+    if expected_checkpoints:
+        unknown = set(submitted) - set(expected_checkpoints)
+        if unknown:
+            raise InspectionReferenceError("Checkpoint does not belong to the selected template version")
+
+        missing = {
+            checkpoint_id
+            for checkpoint_id, checkpoint in expected_checkpoints.items()
+            if checkpoint.is_required and checkpoint_id not in submitted
+        }
+        if missing:
+            raise InspectionReferenceError("Required checkpoint response missing")
+
+        invalid_na = {
+            checkpoint_id
+            for checkpoint_id, item in submitted.items()
+            if item.answer == CheckpointResult.NA
+            and not expected_checkpoints[checkpoint_id].allows_na
+        }
+        if invalid_na:
+            raise InspectionReferenceError("NA is not allowed for one or more checkpoints")
+
+    has_nok = any(item.answer == CheckpointResult.NOK for item in data.responses)
+    if has_nok and data.outcome == data.outcome.COMPLIANT:
+        raise InspectionReferenceError("A control with NOK checkpoints cannot be compliant")
 
     next_due = None
-    if requirement.interval_months:
+    if requirement.interval_months and data.outcome == data.outcome.COMPLIANT:
         next_due = _add_months(data.performed_at.date(), requirement.interval_months)
 
-    values = data.model_dump(exclude={"template_version_id"})
+    values = data.model_dump(exclude={"responses"})
     inspection = Inspection(
         equipment_id=requirement.equipment_id,
         next_due_date=next_due,
         template_version_id=template_version_id,
         **values,
     )
+    responses = [
+        InspectionResponse(
+            checkpoint_id=item.checkpoint_id,
+            answer=item.answer.value,
+            comment=item.comment,
+        )
+        for item in data.responses
+    ]
 
-    requirement.next_due_date = next_due
-    db.add(requirement)
-    return repository.add_inspection(db, inspection)
+    try:
+        inspection = repository.add_inspection_with_responses(db, inspection, responses)
+        if data.outcome == data.outcome.COMPLIANT:
+            requirement.next_due_date = next_due
+        db.add(requirement)
+        db.commit()
+        db.refresh(inspection)
+        return inspection
+    except Exception:
+        db.rollback()
+        raise
 
 
 def record_field_verification(
