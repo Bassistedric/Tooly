@@ -69,7 +69,7 @@ function App() {
         <div className="eqRow eqHead"><span>{t('number')}</span><span>{t('equipment')}</span><span>{t('category')}</span><span>{t('location')}</span><span>{t('complianceLabel')}</span><span>{t('nextInspection')}</span><span></span></div>
         {equipment.map(e=><div className="eqRow clickable" key={e.id} onClick={()=>setPage('equipmentDetail')}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
       </div><div className="tableFooter"><span>{t('showing', {shown:4,total:'1 284'})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
-    </main></> : <main>
+    </main></> : page === 'equipmentDetail' ? <main>
       <header><div><button className="backLink" onClick={()=>setPage('equipment')}>← {t('backToEquipment')}</button><h1>{t('demo.VMA-0248.name')}</h1><p>VMA-0248 · Bosch GWS 18V-10</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div></header>
       <section className="detailStatus"><div><span className="equipmentBadge">VMA-0248</span><i className="pill warning">{t('due')}</i></div><div className="detailActions"><button>⌗ {t('showQr')}</button><button>⇄ {t('moveEquipment')}</button><button className="add" onClick={()=>setPage('inspection')}>✓ {t('inspect')}</button></div></section>
       <section className="detailGrid">
@@ -90,7 +90,6 @@ function App() {
           <section className="panel qrCard"><div className="fakeQr">TOOLY<br/><b>VMA-0248</b></div><div><h2>{t('qrIdentification')}</h2><p>{t('qrInstalled')}</p><small>18/09/2026</small></div></section>
         </aside>
       </section>
-    </main> : page === 'equipmentDetail' ? <main>
     </main> : <main className="inspectionPage">
       <header><div><button className="backLink" onClick={()=>setPage('equipmentDetail')}>← {t('backToEquipmentRecord')}</button><h1>{t('fieldInspection')}</h1><p>VMA-0248 · {t('demo.VMA-0248.name')}</p></div><div className="inspectionProgress"><b>{Object.keys(answers).length}/6</b><small>{t('pointsAnswered')}</small></div></header>
       <section className="fieldContext"><div><small>{t('currentWorksite')}</small><b>{worksite}</b></div><div><small>{t('assignedPerson')}</small><b>{holder}</b></div><button onClick={()=>setPage('equipmentDetail')}>{t('correctAssignment')}</button></section>
