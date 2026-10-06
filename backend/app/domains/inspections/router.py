@@ -11,9 +11,26 @@ from .schemas import (
     InspectionRead,
     RequirementCreate,
     RequirementRead,
+    TemplateCreate,
 )
 
 router = APIRouter(prefix="/inspections", tags=["inspections"])
+
+
+@router.post("/templates", status_code=status.HTTP_201_CREATED)
+def create_template(data: TemplateCreate, db: Session = Depends(get_db)):
+    try:
+        template = service.create_template(db, data)
+    except service.InspectionTemplateConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    version = repository.get_latest_published_template_version(db, template.id)
+    return {
+        "id": template.id,
+        "code": template.code,
+        "name": template.name,
+        "published_version_id": version.id if version else None,
+    }
 
 
 @router.get("/templates")
