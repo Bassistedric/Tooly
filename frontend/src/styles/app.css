@@ -6,3 +6,12 @@
 .templateAssignment>.detailSelect:focus-visible{outline:3px solid #a8cdfa;outline-offset:2px;border-color:#246fd4}
 .templateAssignment>small{display:block;color:#526579;font-size:12px;line-height:1.5}
 @media(max-width:650px){.templateAssignment{padding:14px 12px;margin:12px 0 16px}.templateAssignment>.detailSelect{font-size:16px;min-height:48px}.templateAssignment>small{font-size:12px}}
+
+.tradeFilterBar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 18px;padding:12px 16px;background:#f0f5fa;border:1px solid #d9e3ee;border-radius:12px;color:#253954}
+.tradeFilterLabel{font-weight:700}
+.tradeFilterButtons{display:flex;flex-wrap:wrap;gap:6px}
+.tradeFilterButton{padding:9px 16px;border:1px solid #b9c9dc;border-radius:8px;background:white;color:#243c59;cursor:pointer;font-weight:650}
+.tradeFilterButton.selected{background:#173e6b;border-color:#173e6b;color:white}
+.tradeFilterButton:hover:not(.selected){background:#dfeaf6}
+.tradeFilterBar>span:last-child{margin-left:auto;font-size:13px;color:#52677f}
+@media(max-width:600px){.tradeFilterBar{align-items:flex-start}.tradeFilterButtons{width:100%}.tradeFilterButton{flex:1;padding:10px 8px}.tradeFilterBar>span:last-child{margin-left:0}}
