@@ -77,6 +77,8 @@ class Equipment(Base):
     model: Mapped[str | None] = mapped_column(String(150), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    trade: Mapped[str | None] = mapped_column(String(12), nullable=True, index=True)
+
     organization_id: Mapped[int] = mapped_column(
         ForeignKey("organizations.id"),
         index=True,
