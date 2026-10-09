@@ -30,15 +30,6 @@ def create_requirement(db: Session, data: RequirementCreate) -> InspectionRequir
         raise InspectionReferenceError("Equipment not found")
 
     values = data.model_dump()
-    if values.get("template_id") is None and equipment.category_id is not None:
-        template = repository.get_default_template_for_category(
-            db,
-            equipment.category_id,
-            data.kind,
-        )
-        if template is not None:
-            values["template_id"] = template.id
-
     if values.get("template_id") is not None:
         if repository.get_template(db, values["template_id"]) is None:
             raise InspectionReferenceError("Inspection template not found")
@@ -59,8 +50,9 @@ def record_inspection(db: Session, data: InspectionCreate) -> Inspection:
 
     template_version_id = None
     expected_checkpoints = {}
-    if requirement.template_id is not None:
-        version = repository.get_published_template_version(db, requirement.template_id)
+    resolved = resolve_template_for_equipment(db, requirement.equipment_id, requirement.id)
+    if resolved is not None:
+        version = resolved["version"]
         if version is None:
             raise InspectionReferenceError("No published template version available")
         template_version_id = version.id
