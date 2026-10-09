@@ -27,6 +27,7 @@ class EquipmentBase(BaseModel):
     model: str | None = Field(default=None, max_length=150)
     notes: str | None = None
 
+    trade: str | None = Field(default=None, pattern="^(ELEC|HVAC|REF)$")
     organization_id: int
     category_id: int | None = None
 
@@ -44,6 +45,7 @@ class EquipmentCreate(EquipmentBase):
 
 
 class EquipmentUpdate(BaseModel):
+    trade: str | None = Field(default=None, pattern="^(ELEC|HVAC|REF)$")
     serial_number: str | None = Field(default=None, max_length=150)
     external_number: str | None = Field(default=None, max_length=150)
     description: str | None = Field(default=None, min_length=1, max_length=250)
