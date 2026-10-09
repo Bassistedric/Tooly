@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { resolveInspectionTemplate, genericTemplate, meuleuseTemplate } from './inspectionTemplates'
 
 const equipment = [
-  { id:'VMA-0248', name:'Meuleuse angulaire', place:'Chantier WTECEWA31', control:'12/10/2026', state:'À contrôler', tone:'warning' },
-  { id:'VMA-0314', name:'Marteau-piqueur', place:'Camionnette 2-ABC-123', control:'28/11/2026', state:'Conforme', tone:'ok' },
-  { id:'VMA-0187', name:'Manomètre digital', place:'Atelier LLN', control:'Échu', state:'NOK', tone:'danger' },
-  { id:'VMA-0421', name:'Perceuse-visseuse', place:'Stock Jumet', control:'15/01/2027', state:'Conforme', tone:'ok' },
+  { id:'VMA-0248', name:'Meuleuse angulaire', trade:'HVAC', place:'Chantier WTECEWA31', control:'12/10/2026', state:'À contrôler', tone:'warning' },
+  { id:'VMA-0314', name:'Marteau-piqueur', trade:'ELEC', place:'Camionnette 2-ABC-123', control:'28/11/2026', state:'Conforme', tone:'ok' },
+  { id:'VMA-0187', name:'Manomètre digital', trade:'REF', place:'Atelier LLN', control:'Échu', state:'NOK', tone:'danger' },
+  { id:'VMA-0421', name:'Perceuse-visseuse', trade:'ELEC', place:'Stock Jumet', control:'15/01/2027', state:'Conforme', tone:'ok' },
 ]
 
 function LanguageFlag({ code }: { code: string }) {
@@ -19,6 +19,9 @@ function LanguageFlag({ code }: { code: string }) {
 function App() {
   const { t, i18n } = useTranslation()
   const [page, setPage] = useState<'dashboard'|'equipment'|'equipmentDetail'|'inspection'>('dashboard')
+  const [tradeFilter, setTradeFilter] = useState('ALL')
+  const [equipmentSearch, setEquipmentSearch] = useState('')
+  const filteredEquipment = equipment.filter(item => (tradeFilter === 'ALL' || item.trade === tradeFilter) && (item.id + ' ' + item.name + ' ' + item.place).toLocaleLowerCase().includes(equipmentSearch.toLocaleLowerCase()))
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('VMA-0248')
   const selectedEquipment = equipment.find(item => item.id === selectedEquipmentId) ?? equipment[0]
   const [worksite, setWorksite] = useState('WTECEWA31')
@@ -75,12 +78,12 @@ function App() {
       <section className="panel quick"><div><h2>{t('quick')}</h2><p>{t('quickSub')}</p></div><div className="quickActions"><button><b>⌗</b><span>{t('identify')}<small>{t('identifySub')}</small></span></button><button><b>✓</b><span>{t('doInspection')}<small>{t('doInspectionSub')}</small></span></button><button><b>⇄</b><span>{t('assign')}<small>{t('assignSub')}</small></span></button><button><b>▤</b><span>{t('openSds')}<small>{t('openSdsSub')}</small></span></button></div></section>
 </main> : page === 'equipment' ? <>    <main>
       <header><div><h1>{t('equipment')}</h1><p>{t('equipmentListSub')}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div><div className="headerActions"><button className="scan">⌗ {t('scan')}</button><button className="add">+ {t('newEquipment')}</button></div></header>
-      <section className="search"><span>⌕</span><input placeholder={t('search')}/></section>
-      <section className="equipmentToolbar"><div className="filterGroup"><button className="filterActive">{t('all')} <b>1284</b></button><button>{t('toInspect')} <b>37</b></button><button>{t('quarantine')} <b>8</b></button><button>{t('lost')} <b>5</b></button></div><button className="filters">☷ {t('filters')}</button></section>
+      <section className="search"><span>⌕</span><input placeholder={t('search')} value={equipmentSearch} onChange={event=>setEquipmentSearch(event.target.value)}/></section>
+      <section className="tradeFilterBar"><label htmlFor="tooly-trade-filter">{t("tradeFilter")}</label><select id="tooly-trade-filter" className="detailSelect" value={tradeFilter} onChange={event=>setTradeFilter(event.target.value)}><option value="ALL">{t("allTrades")}</option><option value="ELEC">ELEC</option><option value="HVAC">HVAC</option><option value="REF">REF</option></select><span>{t("filteredCount", {count:filteredEquipment.length})}</span></section><section className="equipmentToolbar"><div className="filterGroup"><button className="filterActive">{t('all')} <b>1284</b></button><button>{t('toInspect')} <b>37</b></button><button>{t('quarantine')} <b>8</b></button><button>{t('lost')} <b>5</b></button></div><button className="filters">☷ {t('filters')}</button></section>
       <section className="panel equipmentPanel"><div className="equipmentTable">
         <div className="eqRow eqHead"><span>{t('number')}</span><span>{t('equipment')}</span><span>{t('category')}</span><span>{t('location')}</span><span>{t('complianceLabel')}</span><span>{t('nextInspection')}</span><span></span></div>
-        {equipment.map(e=><div className="eqRow clickable" key={e.id} onClick={()=>{setSelectedEquipmentId(e.id);setPage('equipmentDetail')}}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
-      </div><div className="tableFooter"><span>{t('showing', {shown:4,total:'1 284'})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
+        {filteredEquipment.map(e=><div className="eqRow clickable" key={e.id} onClick={()=>{setSelectedEquipmentId(e.id);setPage('equipmentDetail')}}><span><b>{e.id}</b><small>{t('demoSerial')}</small></span><span><b>{t(`demo.${e.id}.name`)}</b><small>{t('demoBrand')}</small></span><span>{t('portableTool')}</span><span>{t(`demo.${e.id}.place`)}</span><span><i className={'pill '+e.tone}>{e.state==='À contrôler'?t('due'):e.state==='Conforme'?t('compliant'):e.state}</i></span><span>{e.control==='Échu'?t('expired'):e.control}</span><span className="arrow">›</span></div>)}
+      </div><div className="tableFooter"><span>{t('showing', {shown:filteredEquipment.length,total:equipment.length})}</span><div><button disabled>‹</button><button className="pageActive">1</button><button>2</button><button>3</button><button>…</button><button>321</button><button>›</button></div></div></section>
     </main></> : page === 'equipmentDetail' ? <main>
       <header><div><button className="backLink" onClick={()=>setPage('equipment')}>← {t('backToEquipment')}</button><h1>{t(`demo.${selectedEquipment.id}.name`)}</h1><p>{selectedEquipment.id}</p></div><div className="topSelectors"><label>{t('entity')} <select defaultValue="VMA Sud"><option>VMA Sud</option><option>VMA Nord</option><option>BE Maintenance</option></select></label><div className="languages">{[{code:'fr',label:'Français'},{code:'nl',label:'Nederlands'},{code:'en',label:'English'},{code:'pl',label:'Polski'}].map(item=><button key={item.code} title={item.label} aria-label={item.label} className={i18n.language===item.code?'selected':''} onClick={()=>changeLanguage(item.code)}><LanguageFlag code={item.code}/></button>)}</div></div></header>
       <section className="detailStatus"><div><span className="equipmentBadge">{selectedEquipment.id}</span><i className="pill warning">{t('due')}</i></div><div className="detailActions"><button>⌗ {t('showQr')}</button><button>⇄ {t('moveEquipment')}</button><button className="add" onClick={()=>setPage('inspection')}>✓ {t('inspect')}</button></div></section>
