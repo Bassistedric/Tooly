@@ -16,6 +16,9 @@ from .schemas import (
 
 router = APIRouter(prefix="/inspections", tags=["inspections"])
 
+from .template_assignment import router as template_assignment_router
+router.include_router(template_assignment_router)
+
 
 @router.post("/templates", status_code=status.HTTP_201_CREATED)
 def create_template(data: TemplateCreate, db: Session = Depends(get_db)):
