@@ -51,6 +51,8 @@ def record_inspection(db: Session, data: InspectionCreate) -> Inspection:
     template_version_id = None
     expected_checkpoints = {}
     resolved = resolve_template_for_equipment(db, requirement.equipment_id, requirement.id)
+    if resolved is None:
+        raise InspectionReferenceError("No inspection template configured for this requirement")
     if resolved is not None:
         version = resolved["version"]
         if version is None:
